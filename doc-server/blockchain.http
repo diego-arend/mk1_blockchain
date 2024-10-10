@@ -1,0 +1,16 @@
+
+### GET Blockchain status data
+GET http://localhost:3000/status
+
+### POST new Block
+POST http://localhost:3000/blocks
+content-type: application/json
+
+{
+    "index": 1,
+    "previousHash": "46c3cf112a4ce16e7083c6e48a5d2b078c52c93f6f487e351b97e4b83215cabe",
+    "data": "teste" 
+}
+
+### GET Block status data by index or hash
+GET http://localhost:3000/blocks/4
