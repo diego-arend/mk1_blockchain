@@ -7,7 +7,7 @@
     "start": "node ./dist/blockchain.js",
     "dev": "npx nodemon ./src/lib/blockchain.ts --watch .src -e ts",
     "test": "jest --watchAll",
-    "blockchain": "ts-node ./src/server/blockchainServer.ts"
+    "blockchain": "ts-node ./src/server/blockchainServer.ts --run"
   },
   "keywords": [],
   "author": "",
