@@ -12,8 +12,11 @@ const app = express();
 
 /**
  * Register midlewares
+ * - morgan: run in development and production environments
  */
-app.use(morgan("tiny"));
+if (process.argv.includes("--run")) {
+  app.use(morgan("tiny"));
+}
 app.use(express.json());
 
 /**
@@ -62,7 +65,12 @@ app.post("/blocks", (req, res, _next) => {
 
 /**
  * Server startup message
+ * listen run in development and production environments
  */
-app.listen(PORT, () => {
-  console.log(`Blockchain Server is running at ${PORT}`);
-});
+if (process.argv.includes("--run")) {
+  app.listen(PORT, () => {
+    console.log(`Blockchain Server is running at ${PORT}`);
+  });
+}
+
+export { app };
