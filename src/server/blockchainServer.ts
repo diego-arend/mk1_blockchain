@@ -47,7 +47,7 @@ app.get("/blocks/:indexOrHash", (req, res, _next) => {
 });
 
 app.post("/blocks", (req, res, _next) => {
-  if (req.body.hash !== undefined) {
+  if (req.body.hash === undefined) {
     res.sendStatus(422);
     return;
   }
@@ -60,7 +60,7 @@ app.post("/blocks", (req, res, _next) => {
     return;
   }
 
-  res.status(200).json({ data: block });
+  res.status(201).json({ data: block });
 });
 
 /**
