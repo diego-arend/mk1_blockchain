@@ -7,6 +7,7 @@ import Validation from "./validation";
 export default class Blockchain {
   blocks: Block[];
   nextIndex: number = 0;
+  static readonly difficultyFactor = 5;
 
   /**
    * Create Genesis Block
@@ -23,7 +24,7 @@ export default class Blockchain {
   }
 
   /**
-   * Get last Block on chain
+   * Get last Block on blockchainchain
    * @returns Block
    */
   getLastBlock(): Block {
@@ -31,13 +32,26 @@ export default class Blockchain {
   }
 
   /**
-   *
+   * Calculate the current mining difficulty of the block chain.
+   * The current difficulty based on the number of blocks / static difficulty factor
+   * @returns Actual difficulty
+   */
+  getDifficulty(): number {
+    return Math.ceil(this.blocks.length / Blockchain.difficultyFactor);
+  }
+
+  /**
+   * Add new block on blockchain
    * @param block Data block for add
    * @returns If success return object Validation with succes: true. If error return object validation with error message
    */
   addBlock(block: Block): Validation {
     const lastBlock = this.getLastBlock();
-    const validation = block.isValid(lastBlock.hash, lastBlock.index);
+    const validation = block.isValid(
+      lastBlock.hash,
+      lastBlock.index,
+      this.getDifficulty()
+    );
 
     if (!validation.success)
       return new Validation(false, `Invalid Block:${validation.message}`);
@@ -50,7 +64,7 @@ export default class Blockchain {
 
   /**
    * Verify with all hashs in chain are valid
-   * @returns If chain is corrupted, return `Invalid Block:${validation.message}`
+   * @returns If verify chain is corrupted by actual block, return Invalid blockchain
    */
   isValidChain(): Validation {
     for (let i = this.blocks.length - 1; i > 0; i--) {
@@ -58,13 +72,14 @@ export default class Blockchain {
       const previousBlock = this.blocks[i - 1];
       const validation = currentBlock.isValid(
         previousBlock.hash,
-        previousBlock.index
+        previousBlock.index,
+        this.getDifficulty()
       );
 
       if (!validation.success)
         return new Validation(
           false,
-          `Invalid Block #${currentBlock.index}:${validation.message}`
+          `Invalid blockchain #${currentBlock.index}:${validation.message}`
         );
     }
 

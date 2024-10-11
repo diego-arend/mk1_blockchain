@@ -9,6 +9,8 @@ export default class Block {
   previousHash: string;
   timestamp: number;
   data: string;
+  nonce: number;
+  miner: string;
 
   /**
    * Create mock Block
@@ -19,6 +21,8 @@ export default class Block {
     this.timestamp = block?.timestamp || Date.now();
     this.previousHash = block?.previousHash || "";
     this.data = block?.data || "";
+    this.nonce = block?.nonce || 0;
+    this.miner = block?.miner || "";
     this.hash = block?.hash || this.generateHash();
   }
 
@@ -33,8 +37,8 @@ export default class Block {
    * Define if data mock block is valid
    * @returns boolean
    */
-  isValid(prevHash: string, previousIndex: number): Validation {
-    if (!prevHash || previousIndex < 0 || this.index < 0) {
+  isValid(prevHash: string, previousIndex: number, difficulty: number): Validation {
+    if (!prevHash || previousIndex < 0 || this.index < 0 || difficulty < 0) {
       return {
         success: false,
         message: "Invalid mock block data",
