@@ -1,5 +1,8 @@
+import { jest } from "@jest/globals";
 import Block from "../src/lib/block";
 import Blockchain from "./../src/lib/blockchain";
+
+jest.mock("../src/lib/block");
 
 const dataGenesisBlock = {
   index: 0,
@@ -49,7 +52,7 @@ describe("Blockchain test", () => {
     expect(valid.success).toEqual(true);
   });
 
-  test("Should be invalid add block", () => {
+  test("Should NOT be valid add block", () => {
     const blockchain = new Blockchain();
     const block = new Block({
       index: -1,
@@ -59,7 +62,7 @@ describe("Blockchain test", () => {
     const result = blockchain.addBlock(block);
 
     expect(result.success).toEqual(false);
-    expect(result.message).toEqual("Invalid Block:Invalid index");
+    expect(result.message).toEqual("Invalid Block:Invalid mock block data");
   });
 
   test("Should be NOT valid blockchain(adultered block)", () => {
@@ -71,7 +74,7 @@ describe("Blockchain test", () => {
         data: "Block 2",
       } as Block)
     );
-    blockchain.blocks[1].data = "adultered block";
+    blockchain.blocks[1].index = -1;
     const valid = blockchain.isValidChain();
 
     expect(valid.success).toEqual(false);
