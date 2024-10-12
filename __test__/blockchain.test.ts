@@ -10,7 +10,21 @@ const dataGenesisBlock = {
   data: "genesis",
 };
 
+const defaultCreateBlockInfo = {
+  data: "Thu Oct 01 2020 07:00:00 GMT-0300 (Brasilia Standard Time)",
+  difficulty: 1,
+  previousHash: "abcdef",
+  index: 1,
+  feePerTx: 1,
+  maxDifficulty: 62,
+};
+
 describe("Blockchain test", () => {
+  beforeAll(() => {
+    // mock new Date() return fixed date
+    jest.useFakeTimers().setSystemTime(new Date(2020, 9, 1, 7));
+  });
+
   test("Should be valid block genesis", () => {
     const block = new Blockchain();
     const hash = block.blocks.length;
@@ -107,5 +121,12 @@ describe("Blockchain test", () => {
     const block = blockchain.getBlock("1");
 
     expect(block).toEqual(undefined);
+  });
+
+  test("Should be get next blok info", () => {
+    const blockchain = new Blockchain();
+    let info = blockchain.getNextblock();
+
+    expect(info).toEqual(defaultCreateBlockInfo);
   });
 });

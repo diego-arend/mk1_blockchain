@@ -1,5 +1,6 @@
 import Block from "./block";
 import Validation from "../validation";
+import BlockInterface from "../../interfaces/blockInterface";
 
 /**
  * Generate mocked Blockchain
@@ -7,6 +8,8 @@ import Validation from "../validation";
 export default class Blockchain {
   blocks: Block[];
   nextIndex: number = 0;
+  static readonly difficultyFactor = 5;
+  static readonly maxDifficulty = 62;
 
   /**
    * Create Genesis mocked Block
@@ -30,6 +33,15 @@ export default class Blockchain {
    */
   getLastBlock(): Block {
     return this.blocks[this.blocks.length - 1];
+  }
+
+  /**
+   * Calculate the current mining difficulty of the block chain.
+   * The current difficulty based on the number of blocks / static difficulty factor
+   * @returns Actual difficulty
+   */
+  getDifficulty(): number {
+    return Math.ceil(this.blocks.length / Blockchain.difficultyFactor);
   }
 
   /**
@@ -89,5 +101,28 @@ export default class Blockchain {
     } else {
       return findHash();
     }
+  }
+
+  /**
+   * "Return transaction fee"
+   * @returns value
+   */
+  getFeePerTx(): number {
+    return 1;
+  }
+
+  /**
+   * Get next block info
+   * @returns Block
+   */
+  getNextblock(): BlockInterface {
+    return {
+      data: new Date().toString(),
+      difficulty: 0,
+      previousHash: this.getLastBlock().hash,
+      index: 1,
+      feePerTx: this.getFeePerTx(),
+      maxDifficulty: Blockchain.maxDifficulty,
+    } as BlockInterface;
   }
 }

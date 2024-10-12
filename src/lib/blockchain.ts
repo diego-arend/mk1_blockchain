@@ -1,4 +1,5 @@
 import Block from "./block";
+import BlockInterface from "../interfaces/blockInterface";
 import Validation from "./validation";
 
 /**
@@ -8,6 +9,7 @@ export default class Blockchain {
   blocks: Block[];
   nextIndex: number = 0;
   static readonly difficultyFactor = 5;
+  static readonly maxDifficulty = 62;
 
   /**
    * Create Genesis Block
@@ -119,5 +121,35 @@ export default class Blockchain {
     } else {
       return findHash();
     }
+  }
+
+  /**
+   * "Return transaction fee"
+   * @returns value
+   */
+  getFeePerTx(): number {
+    return 1;
+  }
+
+  /**
+   * Get next block info
+   * @returns Block
+   */
+  getNextblock(): BlockInterface {
+    const data = new Date().toString();
+    const difficulty = this.getDifficulty();
+    const previousHash = this.getLastBlock().hash;
+    const index = this.blocks.length;
+    const feePerTx = this.getFeePerTx();
+    const maxDifficulty = Blockchain.maxDifficulty;
+
+    return {
+      data,
+      difficulty,
+      previousHash,
+      index,
+      feePerTx,
+      maxDifficulty,
+    } as BlockInterface;
   }
 }
