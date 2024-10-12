@@ -12,5 +12,8 @@ content-type: application/json
     "data": "teste" 
 }
 
+### GET next Block info data
+GET http://localhost:3000/blocks/next
+
 ### GET Block status data by index or hash
 GET http://localhost:3000/blocks/4

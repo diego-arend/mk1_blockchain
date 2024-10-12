@@ -1,4 +1,4 @@
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import morgan from "morgan";
 import Blockchain from "../lib/blockchain";
 import Block from "../lib/block";
@@ -14,10 +14,13 @@ const app = express();
  * Register midlewares
  * - morgan: run in development and production environments
  */
+app.use(express.json());
+/* c8 ignore start */
+// directive /* c8 ... */ disable lines for test coverage
 if (process.argv.includes("--run")) {
   app.use(morgan("tiny"));
 }
-app.use(express.json());
+/* c8 ignore stop */
 
 /**
  * Intialize instance of Blockchain
@@ -27,7 +30,7 @@ const blockchain = new Blockchain();
 /**
  * Routes
  */
-app.get("/status", (_req, res, _next) => {
+app.get("/status", (_req: Request, res: Response, _next: NextFunction) => {
   res.json({
     numberOfBlocks: blockchain.blocks.length,
     isValid: blockchain.isValidChain(),
@@ -35,18 +38,25 @@ app.get("/status", (_req, res, _next) => {
   });
 });
 
-app.get("/blocks/:indexOrHash", (req, res, _next) => {
-  const block = blockchain.getBlock(req.params.indexOrHash);
-
-  if (!block) {
-    res.sendStatus(404);
-    return;
-  }
-
-  res.json({ data: block });
+app.get("/blocks/next", (req: Request, res: Response, _next: NextFunction) => {
+  res.json({ data: blockchain.getNextblock() });
 });
 
-app.post("/blocks", (req, res, _next) => {
+app.get(
+  "/blocks/:indexOrHash",
+  (req: Request, res: Response, _next: NextFunction) => {
+    const block = blockchain.getBlock(req.params.indexOrHash);
+
+    if (!block) {
+      res.sendStatus(404);
+      return;
+    }
+
+    res.json({ data: block });
+  }
+);
+
+app.post("/blocks", (req: Request, res: Response, _next: NextFunction) => {
   if (req.body.hash === undefined) {
     res.sendStatus(422);
     return;
@@ -67,10 +77,13 @@ app.post("/blocks", (req, res, _next) => {
  * Server startup message
  * listen run in development and production environments
  */
+/* c8 ignore start */
+// directive /* c8 .. */ disable lines for test coverage
 if (process.argv.includes("--run")) {
   app.listen(PORT, () => {
     console.log(`Blockchain Server is running at ${PORT}`);
   });
 }
+/* c8 ignore stop */
 
 export { app };
