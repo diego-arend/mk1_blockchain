@@ -1,9 +1,17 @@
-import express, { NextFunction, Request, Response } from "express";
+require("dotenv").config();
+import express from "express";
 import morgan from "morgan";
-import Blockchain from "../lib/blockchain";
-import Block from "../lib/block";
+import blockchainRouter from "./routes";
+import rateLimit from "express-rate-limit";
 
-const PORT = 3000;
+const PORT = parseInt(process.env.SERVER_PORT || "3000");
+
+const limiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 15 minutes
+  limit: 300, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
+  standardHeaders: "draft-7", // draft-6: `RateLimit-*` headers; draft-7: combined `RateLimit` header
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
+});
 
 /**
  * Create an instance of the Express framework.
@@ -12,7 +20,7 @@ const app = express();
 
 /**
  * Register midlewares
- * - morgan: run in development and production environments
+ * - morgan logs: run in development and production environments
  */
 app.use(express.json());
 /* c8 ignore start */
@@ -21,57 +29,13 @@ if (process.argv.includes("--run")) {
   app.use(morgan("tiny"));
 }
 /* c8 ignore stop */
-
-/**
- * Intialize instance of Blockchain
- */
-const blockchain = new Blockchain();
+// Apply the rate limiting middleware to all requests.
+app.use(limiter);
 
 /**
  * Routes
  */
-app.get("/status", (_req: Request, res: Response, _next: NextFunction) => {
-  res.json({
-    numberOfBlocks: blockchain.blocks.length,
-    isValid: blockchain.isValidChain(),
-    lastBlock: blockchain.getLastBlock(),
-  });
-});
-
-app.get("/blocks/next", (req: Request, res: Response, _next: NextFunction) => {
-  res.json({ data: blockchain.getNextblock() });
-});
-
-app.get(
-  "/blocks/:indexOrHash",
-  (req: Request, res: Response, _next: NextFunction) => {
-    const block = blockchain.getBlock(req.params.indexOrHash);
-
-    if (!block) {
-      res.sendStatus(404);
-      return;
-    }
-
-    res.json({ data: block });
-  }
-);
-
-app.post("/blocks", (req: Request, res: Response, _next: NextFunction) => {
-  if (req.body.hash === undefined) {
-    res.sendStatus(422);
-    return;
-  }
-
-  const block = new Block(req.body as Block);
-  const validation = blockchain.addBlock(block);
-
-  if (!validation.success) {
-    res.status(400).json(validation);
-    return;
-  }
-
-  res.status(201).json({ data: block });
-});
+app.use("/", blockchainRouter);
 
 /**
  * Server startup message
