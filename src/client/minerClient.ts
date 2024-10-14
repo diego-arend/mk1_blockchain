@@ -1,68 +1,62 @@
+require("dotenv").config();
+import axios from "axios";
 import BlockInterface from "../interfaces/blockInterface";
 import Block from "../lib/block";
+import AgentKeepAlive, { HttpsAgent } from "agentkeepalive";
 
-require("dotenv").config();
+/**
+ * Configuration required to avoid error: "socket hang up" in a local environment.
+ */
+axios.defaults.httpAgent = new AgentKeepAlive({ keepAlive: false });
 
+/**
+ * Miner data
+ */
 const minerWallet = {
   privateKey: `${process.env.MINER_PRIVATE_KEY}`,
   publicKey: `${process.env.MINER_PUBLIC_KEY}`,
 };
 
-let totalMined = 0;
-
-const RequestBlock = async (): Promise<BlockInterface> => {
+const RequestBlock = async (): Promise<BlockInterface | String> => {
   try {
     const url = `${process.env.URL_BLOCKCHAIN_SERVER}/blocks/next`;
 
-    const response = await fetch(`${url}`, { method: "GET" });
+    const response = await axios.get(`${url}`);
 
     if (response.status === 200) {
-      const data = await response.json();
+      const data = await response.data;
       const blockInfo = data.data as BlockInterface;
 
       return blockInfo;
     } else {
-      throw new Error("Request error blockchain for block info");
+      return `Request error blockchain for block info:${response}`;
     }
   } catch (e) {
-    console.log("debug error", (e as Error).message);
-    if ((e as Error).message === "fetch failed") {
-      throw new Error("Not connection blockchain");
-    }
-    throw new Error((e as Error).message);
+    return `Request error blockchain for block info`;
   }
 };
 
 const SendNewBlockMined = async (
   payload: Block
-): Promise<ReponseSendNewBlock> => {
+): Promise<ReponseSendNewBlock | String> => {
   try {
     const url = `${process.env.URL_BLOCKCHAIN_SERVER}/blocks/`;
-    const payloadStringfy = JSON.stringify(payload);
-    const postContent = {
-      method: "POST",
-      headers: {
-        Accept: "*/*",
-        "Content-Type": "application/json",
-      },
-      body: payloadStringfy,
-    };
 
-    console.log("debug payload", postContent);
-
-    const response = await fetch(`${url}`, postContent);
+    const response = await axios({
+      method: "post",
+      url: `${url}`,
+      timeout: 10000,
+      data: payload,
+    });
 
     if (response.status === 201) {
-      const data = await response.json();
+      const data = await response.data;
       return { message: "Sending block success!", data: data.data.hash };
     } else {
-      throw new Error("Request error blockchain for block info");
+      return `Invalid block mine:${response}`;
     }
   } catch (e) {
-    if ((e as Error).message === "fetch failed") {
-      throw new Error("Not connection blockchain");
-    }
-    throw new Error((e as Error).message);
+    return `Invalid block mine`;
   }
 };
 
@@ -70,22 +64,20 @@ const SendNewBlockMined = async (
  * Mine new block
  */
 async function miner() {
-  // try {
   console.log("Getting next block info...");
   const requestBlock = await RequestBlock();
 
-  console.log("Minning new block...");
-  const newBlock = Block.fromBlockInfo(requestBlock);
-  newBlock.mine(requestBlock.difficulty, minerWallet.publicKey);
+  if (requestBlock instanceof String) {
+    console.log("Invalid mined block", requestBlock);
+  } else {
+    console.log("Minning new block...");
+    const newBlock = Block.fromBlockInfo(requestBlock);
+    newBlock.mine(requestBlock.difficulty, minerWallet.publicKey);
 
-  console.log("Sending block mined...", newBlock);
-  const sendBlock = await SendNewBlockMined(newBlock);
-  console.log("sendBlock", sendBlock);
-  // } catch (e) {
-  //   throw new Error(`${(e as Error).message}. Stop minning!`);
-  // }
-
-  // TODO verificar falha de request
+    console.log("Sending block mined...", newBlock);
+    const sendBlock = await SendNewBlockMined(newBlock);
+    console.log("sendBlock", sendBlock);
+  }
 
   // Loop mine
   setTimeout(() => {

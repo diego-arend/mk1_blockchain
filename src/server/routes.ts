@@ -8,7 +8,7 @@ import Block from "../lib/block";
 const blockchainRouter: Router = express.Router();
 
 /**
- * Intialize instance of Blockchain
+ * Initialize instance of Blockchain
  */
 const blockchain = new Blockchain();
 
