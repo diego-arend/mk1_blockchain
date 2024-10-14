@@ -1,5 +1,6 @@
 import sha256 from "crypto-js/sha256";
 import Validation from "./validation";
+import BlockInterface from "../interfaces/blockInterface";
 
 /**
  * Blocks class
@@ -53,7 +54,7 @@ export default class Block {
     const prefix = new Array(dificulty + 1).join("0");
 
     do {
-      this.nonce++;
+      this.nonce = this.nonce + 1;
       this.hash = this.generateHash();
     } while (!this.hash.startsWith(prefix));
   }
@@ -88,5 +89,14 @@ export default class Block {
       return new Validation(false, "Invalid hash");
 
     return new Validation();
+  }
+
+  static fromBlockInfo(blockInfo: BlockInterface): Block {
+    const block = new Block();
+    block.index = blockInfo.index;
+    block.previousHash = blockInfo.previousHash;
+    block.data = blockInfo.data;
+
+    return block;
   }
 }

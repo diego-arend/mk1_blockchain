@@ -6,6 +6,9 @@ describe("Block test", () => {
   const exampleMinerWallet = "hasglah";
 
   beforeAll(() => {
+    // mock new Date() return fixed date
+    jest.useFakeTimers().setSystemTime(new Date(2020, 9, 1, 7));
+
     genesisBlock = new Block({
       index: 0,
       previousHash: "",
@@ -133,5 +136,24 @@ describe("Block test", () => {
 
     expect(valid.success).toEqual(false);
     expect(valid.message).toEqual("No mined.");
+  });
+
+  test("Should create from block info", () => {
+    const block = Block.fromBlockInfo({
+      index: 1,
+      previousHash: genesisBlock.hash,
+      difficulty: exampleDifficulty,
+      maxDifficulty: 62,
+      feePerTx: 1,
+      data: "block test 2",
+    });
+    block.mine(exampleDifficulty, exampleMinerWallet);
+    const valid = block.isValid(
+      genesisBlock.hash,
+      genesisBlock.index,
+      exampleDifficulty
+    );
+
+    expect(valid.success).toEqual(true);
   });
 });
