@@ -42,12 +42,7 @@ const SendNewBlockMined = async (
   try {
     const url = `${process.env.URL_BLOCKCHAIN_SERVER}/blocks/`;
 
-    const response = await axios({
-      method: "post",
-      url: `${url}`,
-      timeout: 10000,
-      data: payload,
-    });
+    const response = await axios.post(url, payload);
 
     if (response.status === 201) {
       const data = await response.data;
