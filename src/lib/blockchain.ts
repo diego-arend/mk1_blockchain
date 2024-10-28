@@ -1,5 +1,5 @@
 import Block from "./block";
-import BlockInterface from "../interfaces/blockInterface";
+import BlockInterface from "../typing/blockInterface";
 import Validation from "./validation";
 
 /**

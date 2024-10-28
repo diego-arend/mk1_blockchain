@@ -1,6 +1,6 @@
 import Block from "./block";
 import Validation from "../validation";
-import BlockInterface from "../../interfaces/blockInterface";
+import BlockInterface from "../../typing/blockInterface";
 
 /**
  * Generate mocked Blockchain

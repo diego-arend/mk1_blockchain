@@ -1,6 +1,6 @@
 require("dotenv").config();
 import axios from "axios";
-import BlockInterface from "../interfaces/blockInterface";
+import BlockInterface from "../typing/blockInterface";
 import Block from "../lib/block";
 import AgentKeepAlive, { HttpsAgent } from "agentkeepalive";
 

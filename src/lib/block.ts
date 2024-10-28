@@ -1,6 +1,6 @@
 import sha256 from "crypto-js/sha256";
 import Validation from "./validation";
-import BlockInterface from "../interfaces/blockInterface";
+import BlockInterface from "../typing/blockInterface";
 
 /**
  * Blocks class
